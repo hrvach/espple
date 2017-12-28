@@ -67,7 +67,7 @@ For BASIC, the target address was E000 hex.
 Simply type E000 and press enter, this will specify the upload target address. Then run the TFTP client on your computer and upload the binary file (adjust your target IP accordingly):
 
 ```
-atftp -l apple-basic.bin 192.168.1.2
+atftp -p -l software/basic-0xE000.bin 192.168.1.2
 ```
 
 After TFTP client finishes, simply run the program from target location by typing the location followed by the letter R. If you just transferred BASIC, you would type E000R and be greeted with the '>' prompt.
