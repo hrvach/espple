@@ -16,7 +16,7 @@ Try out the original Apple 1 with a 3$ ESP8266 board on your living room TV - **
 
 ## How does it work?
 
-Video generation is done using the internal I2S bus / DMA functionality.
+High frequency modulated video signal is generated internally (via I2S/DMA) and all you need is a single piece of wire to play antenna. Even though it's extremely weak, it can still be picked up on your TV in the same room.
 
 I2S stands for Inter-IC Sound, a standard for digital audio devices interconnect. ESP8266 supports I2S bus data output using DMA transfers, providing a way to generate a steady stream of bits while the processor can do something else. It gets interrupted when the 'bucket' is empty, and it fills it again with more bits to be pumped out.
 
@@ -124,4 +124,4 @@ Video generation is derived from the much more impressive [channel3](https://git
 
 CPU core is made using the fake6502 project by Mike Chambers.
 
-Apple 1 was famously made by Stephen Wozniak, one of the greatest engineers of our time.
+Apple 1 was famously made by [Stephen Wozniak](https://en.wikipedia.org/wiki/Steve_Wozniak), one of the greatest engineers of our time.
