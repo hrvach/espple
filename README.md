@@ -14,6 +14,8 @@ Try out the original Apple 1 with a 3$ ESP8266 board on your living room TV - **
 - Built-in TFTP server for uploading software
 - Everything is wireless
 
+![screenshot](images/espple_screen.jpg)
+
 ## How does it work?
 
 High frequency modulated video signal is generated internally (via I2S/DMA) and all you need is a single piece of wire to play antenna. Even though it's extremely weak, it can still be picked up on your TV in the same room.
