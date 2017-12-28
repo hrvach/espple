@@ -80,7 +80,7 @@ Press **Ctrl + C** when connected through telnet to trigger emulator reboot. Nei
 
 [![Espple video demonstration](https://img.youtube.com/vi/rCqbB1UmW8o/0.jpg)](https://www.youtube.com/watch?v=rCqbB1UmW8o)
 
-Take a look of the Espple in action.
+Click on the image to see a video of Espple running.
 
 ## Help
 
