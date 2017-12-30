@@ -51,7 +51,7 @@ esptool -p /dev/ttyUSB0 write_flash --flash_mode dio 0x00000 image.elf-0x00000.b
 make credentials ssid="Your SSID" password="Your password"
 ```
 
-This will generate a .bin file containing the credentials and write it to flash memory at 0x3FC00. Please keep this in mind and run this command again with dummy credentials if you intend to sell or borrow your ESP board.
+This will generate a .bin file containing the credentials and write it to flash memory at 0x3C000. Please keep this in mind and run this command again with dummy credentials if you intend to sell or borrow your ESP board.
 
 4. Connect a piece of breadboard jumper cable to the RX pin (GPIO 3)
 
