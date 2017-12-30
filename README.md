@@ -92,7 +92,7 @@ A. This is by design, Apple 1 output works more like a teletype, there is no goi
 
 ##### Q. I've flashed your bin files and now I'm in a reboot loop
 
-A. My board is an ESP-12E, and requires DIO flash mode to be set (2 pins used for address and data) as opposed to QIO mode (4 pins used) some other variants use. Try flashing with QIO and see if that helps.
+A. My board is an ESP-12E, and requires DIO flash mode to be set (2 pins used for address and data) as opposed to QIO mode (4 pins used) some other variants use. Try flashing with DIO and see if that helps.
 
 ##### Q. Wifi doesn't connect
 
