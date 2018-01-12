@@ -108,6 +108,10 @@ On the plus side, it's totally wireless.
 
 A. A packet was probably lost, try again and make sure you have a good wi-fi reception.
 
+##### Q. I'd like to use NTSC
+
+A. Few people asked about the possibility of generating NTSC signal so I've updated the source to support both. Edit generate\_video.c and change #define PAL to #define NTSC.
+
 ##### Q. I can't find a signal on the TV
 
 A. Your RF input connector and the whole signal path is shielded inside the TV so there should be some sort of antenna plugged in. If you don't have an indoor antenna, a piece of wire will do just fine. Make sure you don't short the tip and ring of your input connector because you won't receive anything. In your TV menu choose analogue TV, choose PAL standard and select channel 4. The esp board emits at 60 MHz which is slightly lower than channel 4 frequency, so you might have to fine tune a bit. Most modern TVs should be able to automatically scan and find the channel for you.
