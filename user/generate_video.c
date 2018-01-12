@@ -11,21 +11,52 @@
 #include "signetics_video_rom.h"
 #include <dmastuff.h>
 
+/* Change this to #define NTSC if you like */
+#define PAL 
+
+#ifdef PAL
+  #define LINE_BUFFER_LENGTH 160
+  #define VIDEO_LINES 625
+  #define LINETYPES 6
+
+  /* PAL signals */
+  #define SHORT_SYNC_INTERVAL    5
+  #define LONG_SYNC_INTERVAL    75
+  #define NORMAL_SYNC_INTERVAL  10
+  #define LINE_SIGNAL_INTERVAL 150
+  
+  #define PIXEL_LINE_RESET_EVEN 55
+  #define PIXEL_LINE_RESET_ODD 367
+
+#else
+
+  #define LINE_BUFFER_LENGTH 159
+  #define VIDEO_LINES 525
+  #define LINETYPES 6
+
+  /* NTSC signals */
+  #define SHORT_SYNC_INTERVAL    6
+  #define LONG_SYNC_INTERVAL    73
+  #define SERRATION_PULSE_INT   67
+  #define NORMAL_SYNC_INTERVAL  12
+  #define LINE_SIGNAL_INTERVAL 147
+
+  #define PIXEL_LINE_RESET_EVEN 38
+  #define PIXEL_LINE_RESET_ODD 299
+#endif
+
+
+#define SYNC_LEVEL        0x99999999
+#define WHITE_LEVEL       0xffffffff
+#define BLACK_LEVEL       0xbbbbbbbb
+
 #define WS_I2S_BCK 1
 #define WS_I2S_DIV 2
-
-#define LINE_BUFFER_LENGTH 160
-#define PAL_LINES 625
-#define LINETYPES 6
-
-#define SYNC_LEVEL    0x99999999
-#define WHITE_LEVEL   0xffffffff
-#define BLACK_LEVEL   0xbbbbbbbb
 
 extern uint8_t terminal_ram[40 * 24];
 
 uint32_t i2s_dma_buffer[LINE_BUFFER_LENGTH*LINETYPES];
-static struct sdio_queue i2sBufDesc[PAL_LINES];
+static struct sdio_queue i2sBufDesc[VIDEO_LINES];
 
 int current_pixel_line;
 
@@ -80,20 +111,12 @@ LOCAL void slc_isr(void) {
         }
 }
 
-
-/* PAL signals */
-#define SHORT_SYNC_INTERVAL 5
-#define LONG_SYNC_INTERVAL  75
-#define BACK_PORCH    20
-#define NORMAL_SYNC_INTERVAL  10
-#define LINE_SIGNAL_INTERVAL  150
-
-#define SHORT_SYNC  0
-#define LONG_SYNC   1
+#define SHORT_SYNC      0
+#define LONG_SYNC       1
 #define BLACK_SIGNAL    2
 #define SHORT_TO_LONG   3
 #define LONG_TO_SHORT   4
-#define LINE_SIGNAL   5
+#define LINE_SIGNAL     5
 
 //Initialize I2S subsystem for DMA circular buffer use
 void ICACHE_FLASH_ATTR testi2s_init() {
@@ -101,6 +124,9 @@ void ICACHE_FLASH_ATTR testi2s_init() {
 
         uint32_t * line = i2s_dma_buffer;
 
+
+#ifdef PAL
+	/* PAL timings and definitions */
         uint8_t single_line_timings[20] = {
                 SHORT_SYNC_INTERVAL,  LONG_SYNC_INTERVAL,   SHORT_SYNC_INTERVAL,  LONG_SYNC_INTERVAL,
                 LONG_SYNC_INTERVAL,   SHORT_SYNC_INTERVAL,  LONG_SYNC_INTERVAL, SHORT_SYNC_INTERVAL,
@@ -109,6 +135,68 @@ void ICACHE_FLASH_ATTR testi2s_init() {
                 LONG_SYNC_INTERVAL,   SHORT_SYNC_INTERVAL,  LONG_SYNC_INTERVAL, SHORT_SYNC_INTERVAL,
                 NORMAL_SYNC_INTERVAL, LINE_SIGNAL_INTERVAL
         };
+
+        /* Reference: http://martin.hinner.info/vga/pal_tv_diagram_interlace.jpg */
+
+        uint16_t video_lines[42] = {
+                3,   LONG_SYNC,     0,
+                4,   LONG_TO_SHORT, 0,
+                6,   SHORT_SYNC,    0,
+
+                57,  BLACK_SIGNAL,  0,
+                250, LINE_SIGNAL,   1,
+                311, BLACK_SIGNAL,  0,
+
+                313, SHORT_SYNC,    0,
+                314, SHORT_TO_LONG, 0,
+                316, LONG_SYNC,     0,
+                318, SHORT_SYNC,    0,
+
+                370, BLACK_SIGNAL,  0,
+                562, LINE_SIGNAL,   1,
+                623, BLACK_SIGNAL,  0,
+
+                626, SHORT_SYNC,    0,
+        };
+
+
+#else
+	/* NTSC timings and definitions */
+        uint8_t single_line_timings[20] = {
+                SHORT_SYNC_INTERVAL,  LONG_SYNC_INTERVAL,   SHORT_SYNC_INTERVAL,  LONG_SYNC_INTERVAL + 1,
+                SERRATION_PULSE_INT,  NORMAL_SYNC_INTERVAL, SERRATION_PULSE_INT,  NORMAL_SYNC_INTERVAL + 1,
+                NORMAL_SYNC_INTERVAL, LINE_SIGNAL_INTERVAL,
+                SHORT_SYNC_INTERVAL,  LONG_SYNC_INTERVAL,   SERRATION_PULSE_INT, NORMAL_SYNC_INTERVAL + 1,
+                SERRATION_PULSE_INT,  NORMAL_SYNC_INTERVAL, SHORT_SYNC_INTERVAL, LONG_SYNC_INTERVAL + 1,
+                NORMAL_SYNC_INTERVAL, LINE_SIGNAL_INTERVAL,
+        };
+        
+	/* Reference: http://www.avrfreaks.net/sites/default/files/ntsctime.pdf */ 
+	uint16_t video_lines[48] = {
+		/* Even Field */
+
+		3,   SHORT_SYNC,    0,
+		6,   LONG_SYNC,     0,
+		9,   SHORT_SYNC,    0,
+
+		40,  BLACK_SIGNAL,  0,
+		233, LINE_SIGNAL,   1,
+		263, BLACK_SIGNAL,  0,
+		
+		/* Odd Field */
+
+		265, SHORT_SYNC,    0,
+		266, SHORT_TO_LONG, 0,
+		268, LONG_SYNC,     0,
+		269, LONG_TO_SHORT, 0,
+		271, SHORT_SYNC,    0,
+
+		302, BLACK_SIGNAL,  0,
+		495, LINE_SIGNAL,   1,
+		525, BLACK_SIGNAL,  0,
+	};
+
+#endif
 
         uint32_t single_line_levels[20] = {
                 SYNC_LEVEL, BLACK_LEVEL, SYNC_LEVEL,  BLACK_LEVEL,
@@ -125,53 +213,28 @@ void ICACHE_FLASH_ATTR testi2s_init() {
                 for (i=0; i < single_line_timings[signal]; i++, *line++ = single_line_levels[signal]) ;
 
 
-
-        /* Reference: http://martin.hinner.info/vga/pal_tv_diagram_interlace.jpg */
-
-        uint16_t pal_lines[42] = {
-                /*    Lines	Pattern		Unused  */
-                3,  LONG_SYNC,  0,
-                4,  LONG_TO_SHORT,  0,
-                6,  SHORT_SYNC,   0,
-
-                57, BLACK_SIGNAL, 0,
-                250,  LINE_SIGNAL,  1,
-                311,  BLACK_SIGNAL, 0,
-
-                313,  SHORT_SYNC, 0,
-                314,  SHORT_TO_LONG,  0,
-                316,  LONG_SYNC,  0,
-                318,  SHORT_SYNC, 0,
-
-                370,  BLACK_SIGNAL, 0,
-                562,  LINE_SIGNAL,  1,
-                623,  BLACK_SIGNAL, 0,
-
-                626,  SHORT_SYNC, 0,
-        };
-
-        uint16_t *pal_line = pal_lines;
+        uint16_t *video_line = video_lines;
 
         //Initialize DMA buffer descriptors in such a way that they will form a circular
         //buffer.
-        for (x=0; x<PAL_LINES; x++) {
+        for (x=0; x<VIDEO_LINES; x++) {
                 i2sBufDesc[x].owner=1;
                 i2sBufDesc[x].eof=1;
                 i2sBufDesc[x].sub_sof=0;
                 i2sBufDesc[x].datalen=LINE_BUFFER_LENGTH*4;
                 i2sBufDesc[x].blocksize=LINE_BUFFER_LENGTH*4;
-                i2sBufDesc[x].next_link_ptr=(int)((x<(PAL_LINES-1)) ? (&i2sBufDesc[x+1]) : (&i2sBufDesc[0]));
+                i2sBufDesc[x].next_link_ptr=(int)((x<(VIDEO_LINES-1)) ? (&i2sBufDesc[x+1]) : (&i2sBufDesc[0]));
 
-                if (*pal_line <= x + 1)
-                        pal_line += 3;
+                if (*video_line <= x + 1)
+                        video_line += 3;
 
-                i2sBufDesc[x].buf_ptr = (uint32_t)&i2s_dma_buffer[(*(pal_line + 1))*LINE_BUFFER_LENGTH];
-                i2sBufDesc[x].unused = *(pal_line + 2);
+                i2sBufDesc[x].buf_ptr = (uint32_t)&i2s_dma_buffer[(*(video_line + 1))*LINE_BUFFER_LENGTH];
+                i2sBufDesc[x].unused = *(video_line + 2);
 
         }
 
-        i2sBufDesc[55].unused = 2;
-        i2sBufDesc[367].unused = 3;
+        i2sBufDesc[PIXEL_LINE_RESET_EVEN].unused = 2;
+        i2sBufDesc[PIXEL_LINE_RESET_ODD].unused = 3;
 
 
         /* I2S DMA initialization code */
