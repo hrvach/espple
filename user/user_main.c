@@ -184,7 +184,12 @@ static void ICACHE_FLASH_ATTR dataRecvCallback(void *arg, char *pusrdata, unsign
 
 static void ICACHE_FLASH_ATTR connectionCallback(void *arg){
         struct espconn *telnet_server = arg;
+
+	/* Welcome message and force character mode on client */
+        char *welcome_message = "Welcome to Espple!\n\xff\xfd\x22\xff\xfb\x01";
+
         espconn_regist_recvcb(telnet_server, dataRecvCallback);
+        espconn_send(telnet_server, welcome_message, strlen(welcome_message));
 }
 
 
