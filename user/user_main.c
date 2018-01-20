@@ -282,4 +282,5 @@ void ICACHE_FLASH_ATTR user_init(void)
         espconn_regist_connectcb(telnet_server, connectionCallback);
 
         espconn_accept(telnet_server);
+	espconn_regist_time(telnet_server, 3600, 0);
 }
