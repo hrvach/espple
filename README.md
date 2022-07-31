@@ -86,7 +86,7 @@ one of the greatest engineers of our time.
 
 [Preview]: Resources/Espple.png
 [License]: LICENSE
-[Design]: docs/Workings.md
+[Design]: docs/Design.md
 [Usage]: docs/Usage.md
 [FAQ]: docs/FAQ.md
 [#]: #
