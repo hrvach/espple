@@ -1,66 +1,77 @@
 
-[ESPTool]: https://github.com/espressif/esptool
-[Flash Download Tools]: http://espressif.com/en/support/download/other-tools
 
+# Usage
 
-## Instructions
+## Flashing
 
-#### Flashing The Files
+*Flashing the files onto the controller.*
 
 <br>
 
-1. ***Install A Programmer***
+1.  ***Install a programmer.***
+    
+    <br>
 
-    #### Linux
+    ### Linux
 
     Try **[ESPTool]**.
 
-    **Debian:**
+    <br>
+
+    **Debian**
 
     ```sh
     sudo apt install esptool
     ```
 
-    **Python:**
+    **Python**
 
     ```sh
     pip install esptool
     ```
 
-    **Git:**
+    **Git**
 
     ```sh
     gh repo clone espressif/esptool
     ```
-
-    #### Windows
+    
+    <br>
+    
+    ### Windows
 
     Try **[Flash Download Tools]**.
 
-<br>
+    <br>
+    <br>
 
-2. ***Write The Binaries***
+2.  ***Write the binaries.***
 
-    ```sh
+    ```shell
     esptool                              \
         --flash_mode dio                 \
         -p /dev/ttyUSB0 write_flash      \
         0x00000 image.elf-0x00000.bin    \
         0x40000 image.elf-0x40000.bin
     ```
+    
+    <br>
 
     *`ESP-12E` modules require `dio` as flash <br>
     mode while most other boards use `qio`.*
 
-<br>
+    <br>
+    <br>
 
-3. ***Set Your WiFi Credentials***
+3.  ***Set your WiFi credentials.***
 
     ```sh
     make credentials                    \
         ssid="Your SSID"                \
         password="Your password"
     ```
+    
+    <br>
 
     This will generate a `.bin` file containing your <br>
     **credentials** and write it into flash at `0x3C000`.
@@ -68,34 +79,39 @@
     **Please keep this in mind and run this command again with** <br>
     **dummy credentials if you intend to borrow / sell your ESP.**
 
-<br>
+    <br>
+    <br>
 
-4. ***Make The Antenna***
+4.  ***Make the antenna.***
 
     Simply connect a piece of wire, such as a <br>
     jumper cable to the `RX` / `GPIO 3` pin.
 
-<br>
+    <br>
+    <br>
 
-5. ***TV Setup***
+5.  ***TV Setup***
 
     Turn your TV on and select `analogue` TV, `PAL` system - `channel 4`.
 
     *Some manual fine tuning might be required.*
 
-<br>
+    <br>
+    <br>
 
-6. ***Telnet Connection***
+6.  ***Telnet Connection***
 
     The **IP** address can be read through <br>
     the cable used to flash the firmware.
 
-    *Make sure your terminal program is set to `115200,8N1`.* <br>
-    *Press `enter` several times after connecting.*
+    *Make sure your terminal program is set to `115200,8N1`.*
+    
+    *Press  <kbd>  Enter  </kbd>  several times after connecting.*
 
 <br>
+<br>
 
-#### Loading the software
+## Loading the software
 
 First you need to tell the built-in **TFTP** <br>
 server where to store your program.
@@ -128,8 +144,17 @@ This should greet you with `>` in response.
 
 <br>
 
-### Rebooting
+## Rebooting
 
-To have the emulator **Reboot**, press `Ctrl + C`.
+To have the emulator **Reboot**, press  <kbd>  Ctrl + C  </kbd>
 
 This will neither drop the **WiFi**, nor the **TelNet** connection.
+
+<br>
+
+
+<!----------------------------------------------------------------------------->
+
+[Flash Download Tools]: http://espressif.com/en/support/download/other-tools
+[ESPTool]: https://github.com/espressif/esptool
+
